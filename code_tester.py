@@ -21,7 +21,10 @@ move = input("输入坐标")
 nx,ny = [move[0],move[2]]
 print(f"[]")
 
-"""""
 r,t = "4,7".split(',')
 
 print((int,r)+(int,t))
+"""""
+
+abc = "222"
+print(f"{abc}".encode())
