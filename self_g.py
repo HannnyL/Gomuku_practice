@@ -7,11 +7,12 @@ class Gomuku:
 
 
 
-    def print_board(self):
+    def print_board(self,player):
 
         print("\n  " + " ".join([str(i) for i in range(self.size)])) #用.join可以消除中括号
         for idx,row in enumerate(self.board): #enumerate用来获取每行的索引idx，不然只能直接输出row内容
             print(f"{idx} "+" ".join(row))
+        print("我方:O   对方:X") if player == 'O' else print("我方:X   对方:O")
         print() #用来添加空行
 
 

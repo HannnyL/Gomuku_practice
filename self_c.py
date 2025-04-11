@@ -52,7 +52,7 @@ def is_my_turn(s,newgame):
         except Exception:
             print(f"未知错误，{Exception}")
 
-    newgame.print_board()
+    newgame.print_board(cplayer)
     
     if newgame.win_check(cx,cy,cplayer):
         print("Congratulation！你赢啦")
@@ -63,7 +63,7 @@ def opponent_turn(s,newgame):
     print("对手思考中..")
     sx,sy = recv_move(s)
     newgame.update_board(sx,sy,splayer)
-    newgame.print_board()
+    newgame.print_board(cplayer)
 
     
     if newgame.win_check(sx,sy,splayer):
@@ -90,7 +90,7 @@ def main():
                     time.sleep(1)            
 
             newgame = game.Gomuku(10)
-            newgame.print_board()
+            newgame.print_board(cplayer)
             first_player = result_first_player(s,first_player)
 
             print("新游戏已开始")

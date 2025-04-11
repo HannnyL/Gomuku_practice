@@ -6,7 +6,7 @@ import time
 splayer = "O"
 cplayer = "X"
 
-HOST = '127.0.0.1'
+HOST = '0.0.0.0'
 PORTS = 4567
 
 
@@ -61,7 +61,7 @@ def is_my_turn(conn,newgame):
             print(f"未知错误，{Exception}")
 
 
-    newgame.print_board()
+    newgame.print_board(splayer)
 
     if newgame.win_check(sx,sy,splayer):
         print("Congratulation！你赢啦")
@@ -72,7 +72,7 @@ def opponent_turn(conn,newgame):
     print("对手思考中..")
     cx,cy = recv_move(conn)
     newgame.update_board(cx,cy,cplayer)
-    newgame.print_board()
+    newgame.print_board(splayer)
 
     if newgame.win_check(cx,cy,cplayer):
         print("Schade！你输啦")
@@ -105,7 +105,7 @@ def main():
                         time.sleep(1)
 
                 newgame = game.Gomuku(10)
-                newgame.print_board()
+                newgame.print_board(splayer)
                 last_first = choose_first_player(conn,last_first)
 
                 print("新游戏已开始")
