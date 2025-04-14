@@ -11,10 +11,10 @@ class Gomuku:
     def print_board(self,player):
         
         if self.size <= 10:
-            print("\n   " + " ".join([str(i) for i in range(self.size)])) #用.join可以消除中括号
+            print("\nx→ " + " ".join([str(i) for i in range(self.size)])) #用.join可以消除中括号
         else:
-           print("\n   " + " ".join([str(int(i/10)) for i in range(self.size)]))          
-           print("   " + " ".join([str(int(i%10)) for i in range(self.size)])) 
+           print("\n\\x " + " ".join([str(int(i/10)) for i in range(self.size)]))          
+           print("y\\ " + " ".join([str(int(i%10)) for i in range(self.size)])) 
         for idx,row in enumerate(self.board): #enumerate用来获取每行的索引idx，不然只能直接输出row内容
             if idx <= 9:
                 print(f"0{idx} "+" ".join(row))

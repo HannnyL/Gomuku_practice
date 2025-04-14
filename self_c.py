@@ -65,7 +65,7 @@ def is_my_turn(s,newgame,gamepoint):
     while True:
 
         try:
-            move = input("请输入落子坐标,格式为:→x ↓y,[输入'giveup'认输]")
+            move = input("请输入落子坐标,格式为:x y,[输入'giveup'认输]")
             if move == "giveup":
                 gamepoint.increse_point('s')                
                 print("\n你已认输，本轮落败\n")
@@ -147,7 +147,7 @@ def main():
             newgame = game.Gomuku(size)
             newgame.print_board(cplayer)
 
-            print(f"\n新游戏已开始,棋盘大小为{size}x{size},目前比分|你:对方={gamepoint.cpoints}:{gamepoint.spoints}")
+            print(f"\n新游戏已开始,棋盘大小:【{size}x{size}】,目前比分|你:对方 = {gamepoint.cpoints}:{gamepoint.spoints}\n")
 
             while True:
                 if first_player == 'client':
