@@ -1,18 +1,32 @@
 import socket
 import self_g as game
+from self_score import pointscounter
 import time
+from enum import Enum
 
 splayer = "O"
 cplayer = "X"
 
+
 HOST = '127.0.0.1'
 PORTS = 4567
+
+class Status(Enum):
+    DRAW = True
+    LOSE = True
+
 
 
 
 def recv_move(s):
     data = s.recv(1024).decode()
-    x,y = map(int,data.split('&')) #split中的内容是用来去除的，这句的意思是把这个字符串按照&为分隔符，分割成单独的字符
+    match data:
+        case 'd&d':#平
+            return 999,999
+        case 'g&g':#对方认输
+            return 888,888
+        case _:
+            x,y = map(int,data.split('&')) #split中的内容是用来去除的，这句的意思是把这个字符串按照&为分隔符，分割成单独的字符
     return x,y
 
 def send_move(s,x,y):
@@ -24,23 +38,48 @@ def result_first_player(s,first_player):
 
     match first_player:
         case "server":
-            print("本局对方先手")
+            print("\n\n本局对方先手")
+            print("等候对方决定棋盘大小...")
+            size = int(s.recv(1024).decode())
         case "client":
-            print("本局我方先手")
+            print("\n\n本局我方先手")
+            while True:
+                tempsize = input("请决定棋盘大小(至少为10)")
+                try:
+                    size = int(tempsize)
+                    if size :
+                        s.sendall(f"{size}".encode())                    
+                        break
+                    else:
+                        print("数字过小，请重新输入")
+                except:
+                    print("您的输入应为数字")
+
+
     
-    return first_player
+    return first_player,size
 
 
-def is_my_turn(s,newgame):
+def is_my_turn(s,newgame,gamepoint):
     while True:
             
         try:
-            move = input("请输入落子坐标(格式为:x y)")
-            cx,cy = map(int,move.strip().split())
-
+            move = input("请输入落子坐标,格式为:→x ↓y,[输入'giveup'认输]")
+            if move == "giveup":
+                gamepoint.increse_point('s')                
+                print("\n你已认输，本轮落败\n")
+                send_move(s,'g','g')
+                return Status.LOSE
+            else:
+                cx,cy = map(int,move.strip().split())
             if newgame.update_board(cx,cy,cplayer):
-                send_move(s,cx,cy)
-                break
+                if newgame.is_leftstep_available():    
+                    send_move(s,cx,cy)
+                    break
+                else:
+                    print("\n已无可用步数，此局平局\n")
+                    send_move(s,'d','d')
+                    return Status.DRAW 
             else:
                 print("该坐标超出棋盘范围或已有棋子，请重试")
         except ValueError:
@@ -55,20 +94,33 @@ def is_my_turn(s,newgame):
     newgame.print_board(cplayer)
     
     if newgame.win_check(cx,cy,cplayer):
-        print("Congratulation！你赢啦")
+        gamepoint.increse_point('c')
+        print("\nCongratulation！你赢啦\n")
         return True
     
-def opponent_turn(s,newgame):
+def opponent_turn(s,newgame,gamepoint):
 
     print("对手思考中..")
     sx,sy = recv_move(s)
-    newgame.update_board(sx,sy,splayer)
-    newgame.print_board(cplayer)
+    match sx:
+        case 999:#平局
+            print("\n已无可用步数，此局平局\n")
+            return True
+        case 888:#对方认输
+            print("\n对方已投降，本轮获胜\n")
+            gamepoint.increse_point('c')
+            return True
+        case _:
+            newgame.update_board(sx,sy,splayer)
+            newgame.print_board(cplayer)
 
     
     if newgame.win_check(sx,sy,splayer):
-        print("Schade！你输啦")
+        gamepoint.increse_point('s')      
+        print("\nSchade！你输啦\n")
         return True
+    else:
+        return False
 
 
 def main():
@@ -81,7 +133,8 @@ def main():
         data = s.recv(1024)
         print("来自服务端：",data.decode('utf-8'))   
         
-
+        gamepoint = pointscounter()
+        
         while True:
 
             if first_player != None:
@@ -89,58 +142,23 @@ def main():
                     print(f"{11-i}s后开启新游戏...")
                     time.sleep(1)            
 
-            newgame = game.Gomuku(10)
+            first_player,size = result_first_player(s,first_player)
+            newgame = game.Gomuku(size)
             newgame.print_board(cplayer)
-            first_player = result_first_player(s,first_player)
 
-            print("新游戏已开始")
+            print(f"\n新游戏已开始,棋盘大小为{size}x{size},目前比分|你:对方={gamepoint.cpoints}:{gamepoint.spoints}")
 
             
             while True:
-                
-                """""
-                print("对手思考中..")
-                sx,sy = recv_move(s)
-                newgame.update_board(sx,sy,splayer)
-                newgame.print_board()
-
-                
-                if newgame.win_check(sx,sy,splayer):
-                    print("Schade！你输啦")
-                    break
-                
-                while True:
-                        
-                    try:
-                        move = input("请输入落子坐标(格式为:x y)")
-                        cx,cy = map(int,move.strip().split())
-
-                        if newgame.update_board(cx,cy,cplayer):
-                            send_move(s,cx,cy)
-                            break
-                        else:
-                            print("非法落子坐标，请重新输入(格式为:x y)")
-                    except:
-                        print("对方已断开连接/落子无效")
-
-
-                newgame.print_board()
-                
-                if newgame.win_check(cx,cy,cplayer):
-                    print("Congratulation！你赢啦")
-                    break
-
-                """""
-
                 if first_player == 'client':
-                    if is_my_turn(s,newgame):
+                    if is_my_turn(s,newgame,gamepoint):
                         break
-                    if opponent_turn(s,newgame):
+                    if opponent_turn(s,newgame,gamepoint):
                         break
                 else:
-                    if opponent_turn(s,newgame):
+                    if opponent_turn(s,newgame,gamepoint):
                         break
-                    if is_my_turn(s,newgame):
+                    if is_my_turn(s,newgame,gamepoint):
                         break
 
 

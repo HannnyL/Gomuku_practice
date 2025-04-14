@@ -1,5 +1,5 @@
 import self_g as game
-
+import os
 """""
 player = "X"
 
@@ -25,6 +25,14 @@ r,t = "4,7".split(',')
 
 print((int,r)+(int,t))
 """""
-
+#先手/服务器决定棋盘大小 √  size应>10
+#比分机制 √
+#投降 √
+#断线重连
 abc = "222"
-print(f"{abc}".encode())
+
+print(int(abc)+1)
+
+os.system('cls')
+
+print("meile")
